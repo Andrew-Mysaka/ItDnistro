@@ -1,0 +1,582 @@
+﻿@model IEnumerable<DataBase.TourPhoto>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ua">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Link Swiper's CSS -->
+    <link rel="stylesheet" href="~/swiper/package/css/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="~/css/styles.css" />
+
+    <title>travel.intita.com</title>
+
+    <!-- Swiper's styles -->
+    <style>
+        .swiper-container {
+            width: 100%;
+            padding-top: 20px;
+        }
+
+        .swiper-slide {
+            background-position: center;
+            background-size: cover;
+            width: 420px;
+            height: 300px;
+        }
+
+        .block1 {
+            background-image: url("../images/Gallery/@{ @ViewBag.Background }");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center top;
+            height: fit-content;
+            width: 100%;
+        }
+
+        .block4 {
+            background-image: url("../images/Gallery/@{ @ViewBag.BackgroundTwo }");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center top;
+            height: fit-content;
+            margin-top: -45vh;
+            width: 100%;
+            position: relative;
+            z-index: -1;
+            text-align: center;
+            font-family: "Bahnschrift", sans-serif;
+        }
+
+        .block6 {
+            background-image: url("../images/Gallery/@{ @ViewBag.BackgroundThree }");
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center top;
+            height: 42vh;
+            position: relative;
+            z-index: -2;
+            padding: 0;
+        }
+       #exampleModal{
+    border-radius: 30px;
+}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+    <script src="sweetalert2.all.min.js"></script>
+    <!-- Optional: include a polyfill for ES6 Promises for IE11 -->
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+    @*<script type="text/javascript"  src="~/js/send-and-valid.js"></script>*@
+    <script type="text/javascript">
+
+jQuery(document).ready(function($) {
+	var $loading = $('<div class="loading"><img  alt="" /></div>');
+	$(".default").each(function(){
+		var defaultVal = $(this).attr('title');
+		$(this).focus(function(){
+			if ($(this).val() == defaultVal){
+				$(this).removeClass('active').val('');
+			}
+		});
+		$(this).blur(function() {
+			if ($(this).val() == ''){
+				$(this).addClass('active').val(defaultVal);
+			}
+		})
+		.blur().addClass('active');
+    });
+    $('.button4').click(function (d) {
+        removeToDefault();
+    });
+
+	$('.btn-submit').click(function(e){
+
+        var emailReg = /^\w+([\.-]?\w+)*@@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        var telReg1 = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+        removeToDefault();
+        var e_mes = document.getElementById("email-err");
+        var n_mes = document.getElementById("name-err");
+        var t_mes = document.getElementById("tel-err");
+
+
+        var data = {
+            FullName: $("#input-name").val(),
+            EMail: $("#input-email").val(),
+            PhoneNumber: $("#input-phone").val(),
+            TourTypeId: @ViewBag.TourId
+
+        };
+
+        if (data.EMail.length == 0) {
+
+            e_mes.innerText = "Обов'язкове поле";
+        }
+        if (data.EMail.length != 0 && !emailReg.test(data.EMail)) {
+
+            e_mes.innerText = "Введіть валідну email адресу";
+        }
+        if (data.FullName.length == 0)
+        {
+             n_mes.innerText = "Обов'язкове поле";
+
+        }
+        if (data.PhoneNumber.length == 0)
+        {
+            t_mes.innerText = "Обов'язкове поле";
+        }
+        if (data.PhoneNumber.length != 0 && !data.PhoneNumber.match(telReg1)  )
+        {
+            t_mes.innerText = "Введіть валідний номер телефону ";
+        }
+        if (e_mes.innerText != "") {
+             $('#input-email').css("box-shadow", "0 0 5px #FF0000");
+        }
+        if (n_mes.innerText != "") {
+             $('#input-name').css("box-shadow", "0 0 5px #FF0000");
+        }
+        if (t_mes.innerText != "") {
+             $('#input-phone').css("box-shadow", "0 0 5px #FF0000");
+        }
+
+       if (t_mes.innerText == "" && e_mes.innerText == "" && n_mes.innerText == "") {
+$("[data-dismiss=modal]").trigger({ type: "click" });
+                $.ajax({
+                    url: "/Home/SetData",
+                    type: 'POST',
+                    cache: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: Swal.fire(
+                        'Чудово!',
+                        'Вас зареєстровано!',
+                        'success'
+)
+                });
+
+}
+
+		e.preventDefault();
+	});
+});
+function removeToDefault(){
+	$('.default').each(function(){
+		var defaultVal = $(this).attr('placeholder');
+		if ($(this).val() == defaultVal){
+			$(this).val('');
+		}
+    });
+     x=document.getElementsByClassName("error");  // Find the elements
+    for(var i = 0; i < x.length; i++){
+    x[i].innerText="";    // Change the content
+    }
+         $('#input-email').css("box-shadow","0 0 1px #00b33c ");
+         $('#input-name').css("box-shadow","0 0 1px #00b33c ");
+         $('#input-phone').css("box-shadow", "0 0 1px #00b33c ");
+}
+    </script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <header class="col-12">
+            <br>
+            <div class="container80">
+                <div class="row justify-spase-around">
+                    <div class="col-auto"><img class="logo" src="~/images/logo.png" alt=""></div>
+                    <div class="col-1 separator"></div>
+                    @*<div class="col-sm-3 add_separator"><a href="~/scandinavia">Скандинавія</a></div>*@
+                    @*<div class="col-sm-3 add_separator"><a href="~/carpaty">Карпати</a></div>*@
+                    @await Component.InvokeAsync("NavigationMenuMain", @ViewBag.TourId)
+
+                    <div class="col-auto contactNumber">+38 067 <b>431 74 24</b> <br> +38 073 <b>209 97 43</b></div>
+                </div>
+            </div>
+
+        </header>
+
+        <div class="header col-12"></div>
+
+        <div class="block1 col-12">
+            <div class="headerBackdown">
+                <h1>@ViewBag.TourName<br> @ViewBag.TourTagName</h1>
+                <h3 class="blue">@ViewBag.DateFrom - @ViewBag.DateTo</h3>
+                <div class="socialMedia">
+                    <a href="#" class="fa fa-linkedin"></a> <br>
+                    <a href="#" class="fa fa-facebook"></a> <br>
+                    <a href="#" class="fa fa-instagram"></a> <br>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary button4" data-toggle="modal" data-target="#exampleModal">
+                        Приєднатись
+                    </button>
+                </div>
+                <div class="footerBlock1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+
+        <div class="block2 col-12">
+            <h2 class="firstHeader">Наша подорож</h2>
+            <br>
+            <div class="container container1">
+                <div class="row justify-content-center">
+                    <div class="col-9">
+                        <p>
+                            @ViewBag.TourTypeDescription
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <img class="ImgCloud1" src="~/images/cloud1.png" alt="">
+            <img class="ImgCloud2" src="~/images/cloud2.png" alt="">
+            <div class="footerBlock2"></div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="block3 col-12">
+            <div class="container80">
+                <div class="content-title">
+                    <h2 class="secondHeader">Взяти з собою<br>в дорогу</h2>
+                </div>
+                <div class="row">
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/tourist-tax.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Документи</h3>
+                            <ul>
+                                <li>паспорт гомадянина України</li>
+                                <li>свідоцтво про народження для дітей</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/bathtub.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Засоби гігієни</h3>
+                            <ul>
+                                <li>зубна щітка</li>
+                                <li>зубна паста</li>
+                                <li>мило</li>
+                                <li>туалетний папір</li>
+                                <li>рушник</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/restaurant.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Посуд</h3>
+                            <ul>
+                                <li>ніж</li>
+                                <li>кухоль</li>
+                                <li>ложка, вилка</li>
+                                <li>стопка</li>
+                                <li>глибока миска</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/breakfast.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Харчування</h3>
+                            <ul>
+                                <li>енергетичні батончики</li>
+                                <li>горішки</li>
+                                <li>бутерброди</li>
+                                <li>фляга чи пляшка з водою 1,5 л</li>
+                                <li>алкоголь:)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/luggage.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Спорядження</h3>
+                            <ul>
+                                <li>намети на кілька людей</li>
+                                <li>рюкзак</li>
+                                <li>спальник</li>
+                                <li>каремат</li>
+                                <li>ліхтар(бажано на голову)</li>
+                                <li>батарейки</li>
+                                <li>дощовик для рюкзака</li>
+                                <li>сірники(запальничка)</li>
+                                <li>powerbank</li>
+                                <li>компас(навігатор)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/umbrella.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Засоби захисту</h3>
+                            <ul>
+                                <li>дощовик</li>
+                                <li>сонцезахисні окуляри</li>
+                                <li>засіб від комарів</li>
+                                <li>крем для загару</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-auto padding-top">
+                        <div>
+                            <object type="image/svg+xml" data="~/icons/flip-flops.svg" class="svg-icon"></object>
+                        </div>
+                        <div class="content">
+                            <h3>Одяг та взуття</h3>
+                            <ul>
+                                <li>кепка, панама від сонця</li>
+                                <li>шкарпетки цілі), одна пара шерстяні</li>
+                                <li>зручне взуття на твердій підошві(не кеди і не кросівки)</li>
+                                <li>кофтина(флісова)</li>
+                                <li>вітровка</li>
+                                <li>нижня білизна </li>
+                                <li>теплі штанці</li>
+                                <li>тонкі і легкі штанці</li>
+                                <li>футболка бавовняна 100%(не майка і не сорочка)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <img class="ImgCloud3" src="~/images/cloud3.png" alt="">
+            <img class="ImgCloud4" src="~/images/cloud5.png" alt="">
+            <div class="footerBlock3"></div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="block4 col-12">
+            <div class="night">
+                <div class="container for-group">
+                    <div class="content-title">
+                        <h2 class="thirdHeader">Для групи</h2>
+                    </div>
+                    <div class="row white">
+                        <div class="col-auto padding-top">
+                            <div class="content">
+                                <ul>
+                                    <li>державний прапор</li>
+                                    <li>прапор ІТ Академії</li>
+                                    <li>квитки на потяг</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-auto padding-top">
+                            <div class="content">
+                                <ul>
+                                    <li>аптечка</li>
+                                    <li>скатертина</li>
+                                    <li>фотоаппарат, екшн-камера</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-auto padding-top">
+                            <div class="content">
+                                <ul>
+                                    <li>пилка, сокира</li>
+                                    <li>крупи, тушонка</li>
+                                    <li>суп в брикетах</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-auto padding-top">
+                            <div class="content">
+                                <ul>
+                                    <li>олія, спеції</li>
+                                    <li>сало, хлібці</li>
+                                    <li>цибуля, часник, морква</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="footerBlock4"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="block5 col-12">
+            <h2 class="forthHeader">яскраві моменти</h2>
+            <br>
+            <h3 class="swiper">@ViewBag.TourName</h3>
+            <div class="col-1 invisible">.</div>
+            <!-- Swiper -->
+            <div class="swiper-container">
+                <div class="swiper-wrapper">
+                    @foreach (var photo in Model)
+                    {
+                        <div class="swiper-slide" style="background-image: url(../images/Gallery/@photo.PhotoLink)"></div>
+                    }
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
+            </div>
+            @*<div class="footerBlock5"></div>*@
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="block6 col-12">
+            <div class="night">
+                <br>
+                <footer class="container">
+                    <div class="row">
+                        <div class="col-2">
+                            <div class="col-sm-2"><img class="logo" src="~/images/logo.png" alt=""></div>
+                        </div>
+                        <div class="col-2">
+                            <div class="footer-phone-email">
+                                +38 067 <b>431 74 24</b> <br>info@intita.com
+                            </div>
+                        </div>
+                        <div class="col-sm-4 button-container">
+                            <button type="button" class="btn btn-primary button4" data-toggle="modal" data-target="#exampleModal">
+                                Приєднатись
+                            </button>
+                        </div>
+                        @*<div class="col-sm-1">
+
+                            </div>*@
+                        <div class="footerMedia">
+                            <div class="col-sm-1 social-media-container">
+                                <a href="#">
+                                    <img src="~/icons/facebook-logo.png" alt="" class="social-icon">
+                                </a>
+                            </div>
+                            <div class="col-sm-1 social-media-container">
+                                <a href="#">
+                                    <img src="~/icons/twitter.png" alt="" class="social-icon">
+                                </a>
+                            </div>
+                            <div class="col-sm-1 social-media-container">
+                                <a href="#">
+                                    <img src="~/icons/instagram-logo.png" alt="" class="social-icon">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Приєднатися до @ViewBag.TourName</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="modal-body" class="modal-body">
+
+
+                    <fieldset>
+
+
+                        <div class="form-group">
+                            <label><img class="modal-ico" src="~/icons/email-icon.png" alt="" /> Email:</label>
+                            <input id="input-email" type="email" class="form-control required default" name="email" aria-describedby="emailHelp" placeholder="Введіть Еmail" required />
+                            <span id="email-err" class="error"></span>
+                        </div>
+                        <div class="form-group">
+                            <img class="modal-ico" src="~/icons/name-icon.png" alt="" /> <label>Повне ім'я:</label>
+                            <input id="input-name" type="text" class="form-control required  default" name="name" aria-describedby="emailHelp" placeholder="Введіть ПІБ" required />
+                            <span id="name-err" class="error"></span>
+                        </div>
+                        <div class="form-group">
+                            <label><img class="modal-ico" src="~/icons/tel-icon.png" alt="" /> Телефон:</label>
+                            <input id="input-phone" type="text" class="form-control required default" name="phone" aria-describedby="emailHelp" placeholder="Введіть ваш номер телефону" required />
+                            <span id="tel-err" class="error"></span>
+                        </div>
+
+
+                    </fieldset>
+
+                </div>
+                <div class="modal-footer">
+                    <button id="close-modal" type="button" class="btn btn-secondary" data-dismiss="modal">Закрити</button>
+                    <button id="save" type="button" class="btn btn-primary btn-submit">Зберегти</button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.17.0/jquery.validate.min.js"
+            asp-fallback-src="~/lib/jquery-validation/dist/jquery.validate.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator">
+    </script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.validation.unobtrusive/3.2.10/jquery.validate.unobtrusive.min.js"
+            asp-fallback-src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"
+            asp-fallback-test="window.jQuery && window.jQuery.validator && window.jQuery.validator.unobtrusive">
+    </script>
+    <!-- Swiper JS -->
+    <script src="~/swiper/package/js/swiper.min.js"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+        var swiper = new Swiper('.swiper-container', {
+            effect: 'coverflow',
+            grabCursor: true,
+            centeredSlides: true,
+            slidesPerView: 'auto',
+            coverflowEffect: {
+                rotate: 50,
+                stretch: 0,
+                depth: 100,
+                modifier: 1,
+                slideShadows: true,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+            },
+        });
+    </script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"
+            integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"
+            integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+            crossorigin="anonymous"></script>
+
+</body>
+</html>
+
